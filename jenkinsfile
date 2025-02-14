@@ -14,8 +14,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
-                //작업 디렉토리 확인
-                sh 'ls -l'
+                
+                
             }
         }
 
@@ -25,7 +25,10 @@ pipeline {
                     withCredentials([usernamePassword(credentialsId: 'acr-credential-id', passwordVariable: 'ACR_PASSWORD', usernameVariable: 'ACR_USERNAME')]) {
                         // Log in to ACR securely
                         sh "az acr login --name $CONTAINER_REGISTRY --username $ACR_USERNAME --password $ACR_PASSWORD"
-                        
+
+                        //작업 디렉토리 확인
+                        sh 'ls -l'
+
                         // Build and push Docker image to ACR
                         sh "docker build -t $CONTAINER_REGISTRY/$REPO:$TAG ."
                         sh "docker push $CONTAINER_REGISTRY/$REPO:$TAG"
