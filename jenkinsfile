@@ -35,10 +35,4 @@ pipeline {
             }
         }
   }
-    post {
-        always {
-            // Docker 이미지를 정리하여 공간을 확보
-            sh 'docker system prune -f'
-        }
-    }
 }
