@@ -1,0 +1,46 @@
+pipeline {
+     agent {
+        label 'docker-agent'
+    }
+     environment {
+        CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
+        RESOURCE_GROUP = 'aks_test'
+        REPO = 'test/front'
+        IMAGE_NAME = 'test/front:latest'
+
+        TAG_VERSION = "v1.0.Beta"
+        TAG = "${TAG_VERSION}${env.BUILD_ID}"
+        NAMESPACE = 'front'
+        GIT_CREDENTIALS_ID = 'github'
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+        stage('Build and Push Docker Image to ACR..') {
+            steps {
+                script {
+                    
+                    withCredentials([usernamePassword(credentialsId: 'acr-credential-id', passwordVariable: 'ACR_PASSWORD', usernameVariable: 'ACR_USERNAME')]) {
+                        // Log in to ACR
+                        sh "az acr login --name $CONTAINER_REGISTRY --username $ACR_USERNAME --password $ACR_PASSWORD"
+
+                        // Build and push Docker image to ACR
+                        // 변경: 이미지 이름을 $CONTAINER_REGISTRY/$IMAGE_NAME으로 수정
+                        sh "docker build -t $CONTAINER_REGISTRY/$REPO:$TAG ."
+                        sh "docker push $CONTAINER_REGISTRY/$REPO:$TAG"
+                    }
+                }
+            }
+        }
+  }
+    post {
+        always {
+            // Docker 이미지를 정리하여 공간을 확보
+            sh 'docker system prune -f'
+        }
+    }
+}
