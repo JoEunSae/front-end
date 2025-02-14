@@ -26,13 +26,13 @@ pipeline {
                         // Log in to ACR securely
                         sh "az acr login --name $CONTAINER_REGISTRY --username $ACR_USERNAME --password $ACR_PASSWORD"
 
-                        //작업 디렉토리 확인
-                        sh 'ls -l'
-                        sh 'pwd'
 
                         // Build and push Docker image to ACR
                         sh """
-                            docker build -f /root/.jenkins/workspace/front/Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
+                            cd /root/.jenkins/workspace/front
+                            ls
+                            pwd
+                            /usr/bin/docker build -f Dockerfile  -t $CONTAINER_REGISTRY/$REPO:$TAG .
                             docker push $CONTAINER_REGISTRY/$REPO:$TAG
                         """
                     }
