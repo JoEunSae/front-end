@@ -28,10 +28,11 @@ pipeline {
 
                         //작업 디렉토리 확인
                         sh 'ls -l'
+                        sh 'pwd'
 
                         // Build and push Docker image to ACR
                         sh """
-                            docker build -f ./Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
+                            docker build -f Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
                             docker push $CONTAINER_REGISTRY/$REPO:$TAG
                         """
                     }
