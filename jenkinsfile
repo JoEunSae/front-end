@@ -10,8 +10,6 @@ pipeline {
 
         TAG_VERSION = "v1.0.Beta"
         TAG = "${TAG_VERSION}${env.BUILD_ID}"
-        NAMESPACE = 'front'
-        GIT_CREDENTIALS_ID = 'github'
     }
 
     stages {
