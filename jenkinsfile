@@ -4,7 +4,7 @@ pipeline {
     environment {
         CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
         RESOURCE_GROUP = 'aks_test'
-        REPO = 'test/front-end'
+        REPO = 'front-end'
         IMAGE_NAME = 'test/front:latest'
         TAG_VERSION = "v1.0.Beta"
         TAG = "${TAG_VERSION}${env.BUILD_ID}"
