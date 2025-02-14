@@ -30,8 +30,10 @@ pipeline {
                         sh 'ls -l'
 
                         // Build and push Docker image to ACR
-                        sh "docker build -t $CONTAINER_REGISTRY/$REPO:$TAG ."
-                        sh "docker push $CONTAINER_REGISTRY/$REPO:$TAG"
+                        sh """
+                            docker build -f ./Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
+                            docker push $CONTAINER_REGISTRY/$REPO:$TAG
+                        """
                     }
                 }
             }
