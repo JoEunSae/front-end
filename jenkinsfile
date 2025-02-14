@@ -26,7 +26,7 @@ pipeline {
                         
                         // Build and push Docker image to ACR
                         sh """
-                            docker build -t ./Dockerfile $CONTAINER_REGISTRY/$REPO:$TAG .
+                            docker build -f ./Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
                             docker push $CONTAINER_REGISTRY/$REPO:$TAG
                         """
                     }
