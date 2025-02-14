@@ -4,7 +4,7 @@ pipeline {
     environment {
         CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
         RESOURCE_GROUP = 'aks_test'
-        REPO = 'test/front'
+        REPO = 'test/front-end'
         IMAGE_NAME = 'test/front:latest'
         TAG_VERSION = "v1.0.Beta"
         TAG = "${TAG_VERSION}${env.BUILD_ID}"
@@ -28,7 +28,7 @@ pipeline {
                         
                         // Build and push Docker image to ACR
                         sh """
-                            docker build -t $CONTAINER_REGISTRY/$REPO:$TAG .
+                            docker build -f Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
                             docker push $CONTAINER_REGISTRY/$REPO:$TAG
                         """
                     }
