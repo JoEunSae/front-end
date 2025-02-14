@@ -27,10 +27,8 @@ pipeline {
                         sh "az acr login --name $CONTAINER_REGISTRY --username $ACR_USERNAME --password $ACR_PASSWORD"
                         
                         // Build and push Docker image to ACR
-                        sh """
-                            docker build -f Dockerfile -t $CONTAINER_REGISTRY/$REPO:$TAG .
-                            docker push $CONTAINER_REGISTRY/$REPO:$TAG
-                        """
+                        sh "docker build -t $CONTAINER_REGISTRY/$REPO:$TAG ."
+                        sh "docker push $CONTAINER_REGISTRY/$REPO:$TAG"
                     }
                 }
             }
