@@ -30,9 +30,10 @@ pipeline {
                         // Build and push Docker image to ACR
                         sh """
                             cd /root/.jenkins/workspace/front
-                            ls
+                            ls -al
                             pwd
-                            /usr/bin/docker build -f Dockerfile  -t $CONTAINER_REGISTRY/$REPO:$TAG .
+                            docker --version
+                            docker build -f Dockerfile  -t $CONTAINER_REGISTRY/$REPO:$TAG .
                             docker push $CONTAINER_REGISTRY/$REPO:$TAG
                         """
                     }
