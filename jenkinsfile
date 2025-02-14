@@ -1,7 +1,5 @@
 pipeline {
-     agent {
-        label 'docker-agent'
-    }
+     agent any
      environment {
         CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
         RESOURCE_GROUP = 'aks_test'
