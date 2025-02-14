@@ -14,6 +14,8 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+                //작업 디렉토리 확인
+                sh 'ls -l'
             }
         }
 
