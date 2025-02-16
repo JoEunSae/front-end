@@ -6,7 +6,7 @@ pipeline {
         RESOURCE_GROUP = 'aks_test'
         REPO = 'front-end'
         IMAGE_NAME = 'test/front:latest'
-        TAG_VERSION = "v1.0.Beta"
+        TAG_VERSION = "v1.0"
         TAG = "${TAG_VERSION}"
     }
 
