@@ -19,21 +19,29 @@ pipeline {
             steps {
                 script {
                     withCredentials([usernamePassword(credentialsId: 'acr-credential-id', passwordVariable: 'ACR_PASSWORD', usernameVariable: 'ACR_USERNAME')]) {
-                        // ACR에서 최신 태그 가져오기 (백슬래시로 $ 이스케이프)
-                        def latestTag = sh(script: '''
-                            az acr repository show-tags --name goodbirdacr.azurecr.io --repository front-end --orderby time_desc --output tsv | grep -E '^v[0-9]+\\.[0-9]+$' | head -n 1
-                        ''', returnStdout: true).trim()
+                        // ACR 로그인
+                        sh "az acr login --name ${CONTAINER_REGISTRY} --username ${ACR_USERNAME} --password ${ACR_PASSWORD}"
+
+                        // ACR에서 최신 태그 가져오기
+                        def latestTags = sh(script: """
+                            az acr repository show-tags --name goodbirdacr.azurecr.io --repository ${REPO} --orderby time_desc --output tsv | grep -E '^v[0-9]+\\.[0-9]+$' | head -n 3
+                        """, returnStdout: true).trim().split("\n")
 
                         // 최신 태그가 없으면 v1.0부터 시작
-                        if (!latestTag) {
+                        if (latestTags.isEmpty() || latestTags[0].trim() == "") {
                             env.TAG_VERSION = "v1.0"
                         } else {
+                            def latestTag = latestTags[0].trim()
                             def versionParts = latestTag.replace("v", "").split("\\.")
                             def newVersion = versionParts[0] + "." + (versionParts[1].toInteger() + 1)
                             env.TAG_VERSION = "v${newVersion}"
                         }
 
+                        // 최신 3개의 버전 유지 (현재 버전 + 이전 2개)
+                        env.OLD_VERSIONS = latestTags.take(2).join(" ")
+
                         echo "New Image Version: ${env.TAG_VERSION}"
+                        echo "Keeping Versions: ${env.OLD_VERSIONS}"
                     }
                 }
             }
@@ -46,12 +54,31 @@ pipeline {
                         // Log in to ACR securely
                         sh "az acr login --name ${CONTAINER_REGISTRY} --username ${ACR_USERNAME} --password ${ACR_PASSWORD}"
 
-                        // Build and push Docker image with versioned tag and latest tag
+                        // Build Docker image with versioned tag and latest tag
                         sh """
-                            docker build -t ${CONTAINER_REGISTRY}/${REPO}:${TAG_VERSION} -t ${CONTAINER_REGISTRY}/${REPO}:latest .
+                            docker build -t ${CONTAINER_REGISTRY}/${REPO}:${TAG_VERSION} -t ${CONTAINER_REGISTRY}/${REPO}:latest ${WORKSPACE}
                             docker push ${CONTAINER_REGISTRY}/${REPO}:${TAG_VERSION}
                             docker push ${CONTAINER_REGISTRY}/${REPO}:latest
                         """
+                    }
+                }
+            }
+        }
+
+        stage('Clean Old Images') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'acr-credential-id', passwordVariable: 'ACR_PASSWORD', usernameVariable: 'ACR_USERNAME')]) {
+                        if (env.OLD_VERSIONS.trim()) {
+                            echo "Deleting Old Versions: ${env.OLD_VERSIONS}"
+                            sh """
+                                for tag in ${env.OLD_VERSIONS}; do
+                                    az acr repository delete --name ${CONTAINER_REGISTRY} --image ${REPO}:$tag --yes || true
+                                done
+                            """
+                        } else {
+                            echo "No old images to delete."
+                        }
                     }
                 }
             }
