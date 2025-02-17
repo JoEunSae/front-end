@@ -5,15 +5,37 @@ pipeline {
         CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
         RESOURCE_GROUP = 'aks_test'
         REPO = 'front-end'
-        IMAGE_NAME = 'test/front:latest'
-        TAG_VERSION = "v1.0"
-        TAG = "${TAG_VERSION}"
+        IMAGE_NAME = 'test/front'
     }
 
     stages {
         stage('Checkout') {
             steps {
                 checkout scm
+            }
+        }
+
+        stage('Determine Version') {
+            steps {
+                script {
+                    withCredentials([usernamePassword(credentialsId: 'acr-credential-id', passwordVariable: 'ACR_PASSWORD', usernameVariable: 'ACR_USERNAME')]) {
+                        // ACR에서 최신 태그 가져오기
+                        def latestTag = sh(script: """
+                            az acr repository show-tags --name $CONTAINER_REGISTRY --repository $REPO --orderby time_desc --output tsv | grep -E '^v[0-9]+\\.[0-9]+$' | head -n 1
+                        """, returnStdout: true).trim()
+
+                        // 최신 태그가 없으면 v1.0부터 시작
+                        if (!latestTag) {
+                            env.TAG_VERSION = "v1.0"
+                        } else {
+                            def versionParts = latestTag.replace("v", "").split("\\.")
+                            def newVersion = versionParts[0] + "." + (versionParts[1].toInteger() + 1)
+                            env.TAG_VERSION = "v${newVersion}"
+                        }
+
+                        echo "New Image Version: ${env.TAG_VERSION}"
+                    }
+                }
             }
         }
 
@@ -24,11 +46,11 @@ pipeline {
                         // Log in to ACR securely
                         sh "az acr login --name $CONTAINER_REGISTRY --username $ACR_USERNAME --password $ACR_PASSWORD"
 
-
-                        // Build and push Docker image to ACR
+                        // Build and push Docker image with versioned tag and latest tag
                         sh """
-                            docker build -t $CONTAINER_REGISTRY/$REPO:$TAG .
-                            docker push $CONTAINER_REGISTRY/$REPO:$TAG
+                            docker build -t $CONTAINER_REGISTRY/$REPO:$TAG_VERSION -t $CONTAINER_REGISTRY/$REPO:latest .
+                            docker push $CONTAINER_REGISTRY/$REPO:$TAG_VERSION
+                            docker push $CONTAINER_REGISTRY/$REPO:latest
                         """
                     }
                 }
