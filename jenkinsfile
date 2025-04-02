@@ -1,8 +1,10 @@
 pipeline {
-    agent docker {
+    agent {
+        docker {
             image 'mcr.microsoft.com/azure-cli'  // Azure CLI가 미리 설치된 이미지
             args '-u root:root'  // 필요시 root 권한으로 실행
         }
+    }
 
     environment {
         CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
