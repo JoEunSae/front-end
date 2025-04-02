@@ -14,7 +14,7 @@ pipeline {
                 checkout scm
                 script {
                     sh '''
-                    sudo curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+                    sudo curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
                     '''
                 }
             }
