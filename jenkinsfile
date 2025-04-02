@@ -1,6 +1,6 @@
 pipeline {
     agent {
-        dockercontainer{
+        dockerContainer{
             image 'mcr.microsoft.com/azure-cli'
             args '-u root:root'
         }
