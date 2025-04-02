@@ -12,6 +12,11 @@ pipeline {
         stage('Checkout') {
             steps {
                 checkout scm
+                script {
+                    sh '''
+                    curl -sL https://aka.ms/InstallAzureCLIDeb | bash
+                    '''
+                }
             }
         }
 
