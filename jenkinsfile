@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         CONTAINER_REGISTRY = 'goodbirdacr.azurecr.io'
-        RESOURCE_GROUP = 'aks_test'
+        RESOURCE_GROUP = 'goodbird-castai'
         REPO = 'front-end'
         IMAGE_NAME = 'test/front'
     }
